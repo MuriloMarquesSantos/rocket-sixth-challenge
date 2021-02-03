@@ -3,8 +3,8 @@ import path from 'path';
 import { Connection, getRepository, getConnection } from 'typeorm';
 import createConnection from '../database';
 
-import Transaction from '../models/Transaction';
-import Category from '../models/Category';
+import Transaction from '../models/transaction';
+import Category from '../models/category';
 
 import app from '../app';
 
@@ -13,11 +13,11 @@ let connection: Connection;
 describe('Transaction', () => {
   beforeAll(async () => {
     connection = await createConnection('test-connection');
-    
+
     await connection.query('DROP TABLE IF EXISTS transactions');
     await connection.query('DROP TABLE IF EXISTS categories');
     await connection.query('DROP TABLE IF EXISTS migrations');
-    
+
     await connection.runMigrations();
   });
 
@@ -74,6 +74,8 @@ describe('Transaction', () => {
       value: 4000,
       category: 'Salary',
     });
+
+    console.log(`Response: ${response}`);
 
     const transaction = await transactionsRepository.findOne({
       where: {
