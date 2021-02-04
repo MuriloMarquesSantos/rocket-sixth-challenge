@@ -4,7 +4,10 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  JoinColumn,
+  OneToOne,
 } from 'typeorm';
+import Category from './category';
 
 @Entity('transactions')
 class Transaction {
@@ -22,6 +25,10 @@ class Transaction {
 
   @Column()
   category_id: string;
+
+  @OneToOne(() => Category)
+  @JoinColumn({ name: 'category_id' })
+  category: Category;
 
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;
