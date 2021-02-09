@@ -3,13 +3,7 @@ import Transaction from '../models/transaction';
 import Category from '../models/category';
 import AppError from '../errors/AppError';
 import GetTransactionService from './GetTransactionService';
-
-interface TransactionRequest {
-  title: string;
-  value: number;
-  type: 'income' | 'outcome';
-  category: string;
-}
+import TransactionRequest from '../dtos/TransactionRequest';
 
 class CreateTransactionService {
   transactionRepository = getRepository(Transaction);

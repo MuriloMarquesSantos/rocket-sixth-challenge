@@ -1,10 +1,16 @@
 import { Router } from 'express';
 
+import multer from 'multer';
+import path from 'path';
+import uploadConfig from '../config/uploadConfig';
+
 import TransactionsRepository from '../repositories/TransactionsRepository';
 import GetTransactionService from '../services/GetTransactionService';
 import CreateTransactionService from '../services/CreateTransactionService';
 import DeleteTransactionService from '../services/DeleteTransactionService';
-// import ImportTransactionsService from '../services/ImportTransactionsService';
+import ImportTransactionsService from '../services/ImportTransactionsService';
+
+const upload = multer(uploadConfig);
 
 const transactionsRouter = Router();
 
@@ -29,8 +35,14 @@ transactionsRouter.delete('/:id', async (request, response) => {
   return response.status(204).json();
 });
 
-transactionsRouter.post('/import', async (request, response) => {
-  // TODO
-});
+transactionsRouter.post(
+  '/import',
+  upload.single('transactions'),
+  async (request, response) => {
+    const importTransactionsService = new ImportTransactionsService();
+    const importResponse = await importTransactionsService.execute();
+    return response.status(201).json(importResponse);
+  },
+);
 
 export default transactionsRouter;
