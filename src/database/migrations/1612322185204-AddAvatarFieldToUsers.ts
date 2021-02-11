@@ -14,7 +14,7 @@ export default class AddAvatarFieldToUsers1612322185204
         columns: [
           {
             name: 'id',
-            type: 'varchar',
+            type: 'uuid',
             isPrimary: true,
             generationStrategy: 'uuid',
             default: 'uuid_generate_v4()',
@@ -43,7 +43,7 @@ export default class AddAvatarFieldToUsers1612322185204
         columns: [
           {
             name: 'id',
-            type: 'varchar',
+            type: 'uuid',
             isPrimary: true,
             generationStrategy: 'uuid',
             default: 'uuid_generate_v4()',
@@ -65,8 +65,8 @@ export default class AddAvatarFieldToUsers1612322185204
           },
           {
             name: 'category_id',
-            type: 'varchar',
-            isNullable: false,
+            type: 'uuid',
+            isNullable: true,
           },
           {
             name: 'created_at',
@@ -96,6 +96,7 @@ export default class AddAvatarFieldToUsers1612322185204
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.dropForeignKey('transactions', 'TransactionCategory');
     await queryRunner.dropTable('categories');
     await queryRunner.dropTable('transactions');
   }

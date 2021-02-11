@@ -13,7 +13,6 @@ class ImportTransactionsService {
     try {
       transactions = await this.readCsv();
       createdTransactions = await this.createTransactions(transactions);
-      console.log(createdTransactions);
     } catch (error) {
       throw new AppError(error.message, 500);
     }
@@ -52,7 +51,6 @@ class ImportTransactionsService {
     await new Promise(resolve => {
       parseCSV.on('end', resolve);
     });
-
     return array;
   }
 
@@ -68,7 +66,6 @@ class ImportTransactionsService {
       );
       transactionsResponse.push(transactionResponse);
     });
-    console.log(transactionsResponse);
     return transactionsResponse;
   }
 }
