@@ -1,12 +1,10 @@
 import { Router } from 'express';
 
 import multer from 'multer';
-import path from 'path';
 import { getCustomRepository } from 'typeorm';
 import uploadConfig from '../config/uploadConfig';
 
 import TransactionsRepository from '../repositories/TransactionsRepository';
-import GetTransactionService from '../services/GetTransactionService';
 import CreateTransactionService from '../services/CreateTransactionService';
 import DeleteTransactionService from '../services/DeleteTransactionService';
 import ImportTransactionsService from '../services/ImportTransactionsService';

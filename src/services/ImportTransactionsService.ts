@@ -13,7 +13,6 @@ class ImportTransactionsService {
     let transactions: TransactionRequest[];
     try {
       transactions = await this.readCsv(filePath);
-      console.log(transactions);
     } catch (error) {
       throw new AppError(error.message, 500);
     }

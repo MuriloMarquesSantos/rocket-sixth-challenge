@@ -75,8 +75,6 @@ describe('Transaction', () => {
       category: 'Salary',
     });
 
-    console.log(`Response: ${response}`);
-
     const transaction = await transactionsRepository.findOne({
       where: {
         title: 'March Salary',
