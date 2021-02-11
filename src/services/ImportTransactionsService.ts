@@ -1,33 +1,29 @@
-import path from 'path';
 import csv from 'csv-parse';
 import fs from 'fs';
+import { getRepository, In, getCustomRepository } from 'typeorm';
 import Transaction from '../models/transaction';
 import AppError from '../errors/AppError';
 import CreateTransactionService from './CreateTransactionService';
 import TransactionRequest from '../dtos/TransactionRequest';
+import Category from '../models/category';
+import TransactionsRepository from '../repositories/TransactionsRepository';
 
 class ImportTransactionsService {
-  async execute(): Promise<Transaction[]> {
+  async execute(filePath: string): Promise<any> {
     let transactions: TransactionRequest[];
-    let createdTransactions;
     try {
-      transactions = await this.readCsv();
-      createdTransactions = await this.createTransactions(transactions);
+      transactions = await this.readCsv(filePath);
+      console.log(transactions);
     } catch (error) {
       throw new AppError(error.message, 500);
     }
-    return createdTransactions;
+    return transactions;
   }
 
-  async readCsv(): Promise<TransactionRequest[]> {
-    const tmpFolder = path.resolve(
-      __dirname,
-      '..',
-      '..',
-      'tmp',
-      'transactions',
-    );
-    const readStream = fs.createReadStream(tmpFolder);
+  async readCsv(filePath: string): Promise<any> {
+    const categoriesRepository = getRepository(Category);
+    const transactionsRepository = getCustomRepository(TransactionsRepository);
+    const readStream = fs.createReadStream(filePath);
 
     const parseStream = csv({
       from_line: 2,
@@ -37,35 +33,75 @@ class ImportTransactionsService {
 
     const parseCSV = readStream.pipe(parseStream);
 
-    const array: TransactionRequest[] = [];
+    const transactions: TransactionRequest[] = [];
+    const categories: string[] = [];
     parseCSV.on('data', line => {
-      const request = {
-        title: line[0],
-        type: line[1],
-        value: line[2],
-        category: line[3],
-      };
-      array.push(request);
+      const [title, type, value, category] = line.map((cell: string) =>
+        cell.trim(),
+      );
+
+      if (!title || !type || !value) return;
+
+      categories.push(category);
+      transactions.push({ title, type, value, category });
     });
 
     await new Promise(resolve => {
       parseCSV.on('end', resolve);
     });
-    return array;
+
+    const existentCategories = await categoriesRepository.find({
+      where: {
+        title: In(categories),
+      },
+    });
+
+    const existentCategoriesTitles = existentCategories.map(
+      (category: Category) => category.title,
+    );
+
+    const addCategoryTitles = categories
+      .filter(category => !existentCategoriesTitles.includes(category))
+      .filter((value, index, self) => self.indexOf(value) === index);
+
+    const newCategories = categoriesRepository.create(
+      addCategoryTitles.map(title => ({
+        title,
+      })),
+    );
+
+    await categoriesRepository.save(newCategories);
+
+    const finalCategories = [...newCategories, ...existentCategories];
+
+    const createdTransactions = transactionsRepository.create(
+      transactions.map(transaction => ({
+        title: transaction.title,
+        type: transaction.type,
+        value: transaction.value,
+        category: finalCategories.find(
+          category => category.title === transaction.category,
+        ),
+      })),
+    );
+
+    await transactionsRepository.save(createdTransactions);
+
+    return { categories, transactions };
   }
 
-  async createTransactions(
-    transactions: TransactionRequest[],
-  ): Promise<Transaction[]> {
+  async createTransactions(transactionsRequest: any): Promise<Transaction[]> {
     const transactionsResponse: Transaction[] = [];
     const createTransactionsService = new CreateTransactionService();
 
-    transactions.forEach(async transaction => {
-      const transactionResponse = await createTransactionsService.execute(
-        transaction,
-      );
-      transactionsResponse.push(transactionResponse);
-    });
+    transactionsRequest.transactions.forEach(
+      async (transaction: TransactionRequest) => {
+        const transactionResponse = await createTransactionsService.execute(
+          transaction,
+        );
+        transactionsResponse.push(transactionResponse);
+      },
+    );
     return transactionsResponse;
   }
 }
