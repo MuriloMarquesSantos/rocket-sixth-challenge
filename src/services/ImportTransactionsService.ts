@@ -1,11 +1,11 @@
 import csv from 'csv-parse';
 import fs from 'fs';
 import { getRepository, In, getCustomRepository } from 'typeorm';
-import Transaction from '../models/transaction';
+import Transaction from '../models/Transaction';
 import AppError from '../errors/AppError';
 import CreateTransactionService from './CreateTransactionService';
 import TransactionRequest from '../dtos/TransactionRequest';
-import Category from '../models/category';
+import Category from '../models/Category';
 import TransactionsRepository from '../repositories/TransactionsRepository';
 
 class ImportTransactionsService {

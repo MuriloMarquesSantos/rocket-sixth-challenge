@@ -1,7 +1,7 @@
 import { EntityRepository, Repository } from 'typeorm';
 import Balance from '../dtos/Balance';
 
-import Transaction from '../models/transaction';
+import Transaction from '../models/Transaction';
 
 @EntityRepository(Transaction)
 class TransactionsRepository extends Repository<Transaction> {
